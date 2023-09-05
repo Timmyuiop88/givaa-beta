@@ -8,16 +8,23 @@ import {Box,useColorModeValue,
   StatGroup,SimpleGrid} from '../utils/chakra'
 
   import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { cookies } from 'next/headers'
+import { cache } from 'react';
+
+export const createServerClient = cache(() => {
+    const cookieStore = cookies()
+    return createServerComponentClient({
+        cookies: () => cookieStore
+    })
+})
 
   import NavBar from "../components/user/navBar";
   export default async function User(){
-    const cookieStore = cookies()
-    const supabase = createServerComponentClient({  cookies: () => cookieStore });
-
+    const supabase = createServerClient()
     const {
       data: { user },
     } = await supabase.auth.getUser();

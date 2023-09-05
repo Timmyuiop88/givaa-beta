@@ -1,14 +1,20 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers'
+import { cache } from 'react';
 
+export const createServerClient = cache(() => {
+    const cookieStore = cookies()
+    return createServerComponentClient({
+        cookies: () => cookieStore
+    })
+})
 
 
 
 import Signup from '../components/auth/signup';
   export default async function SignupPage() {
-    const cookieStore = cookies()
-    const supabase = createServerComponentClient({  cookies: () => cookieStore });
+    const supabase = createServerClient()
     const { data } = await supabase.auth.getSession();
   
     if (data?.session) {

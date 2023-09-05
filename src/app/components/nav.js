@@ -35,6 +35,7 @@ import {
 
 } from "react-icons/ai";
 import {GrFormClose} from "react-icons/gr";
+import NextLink from 'next/link'
 export default function Nav() {
   const mobileNav = useDisclosure();
 

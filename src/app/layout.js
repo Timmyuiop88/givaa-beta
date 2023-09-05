@@ -1,18 +1,22 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+
 import ThemeProvider from './providers'
 import AuthProvider from './components/AuthProvider';
 
-export const metadata = {
-  title: 'Givaa Beta',
-  description: 'Let’s Help And Make People Smile By Giving Of Yours',
-}
+import { cookies } from 'next/headers'
+import { cache } from 'react';
+
+export const createServerClient = cache(() => {
+    const cookieStore = cookies()
+    return createServerComponentClient({
+        cookies: () => cookieStore
+    })
+})
+
 
 export default async function RootLayout({ children }) {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient({cookies: () => cookieStore
-  
-  });
+
+  const supabase = createServerClient();
 
   const {
     data: { session },
