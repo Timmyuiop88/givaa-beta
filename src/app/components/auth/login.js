@@ -34,7 +34,8 @@ import {
   } from '@chakra-ui/react'
   import { FcGoogle } from "react-icons/fc";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { useState } from 'react';
+import { useState } from 'react'
+import Footer from "../footer";
 export default function Login (){
 
     const supabase = createClientComponentClient();
@@ -72,12 +73,10 @@ export default function Login (){
           <Box w={"100%"} h={"100vh"}>
             <Stack w={"100%"} spacing={"0"} h={"100%"} direction={["column","column","row","row"]}>
             
-              <Center h={"100%"} w={["100%","100%","50%","50%"]} bg={"white"}>
+              <Center h={"100%"} w={["100%","100%","100%","50%"]} bg={"white"}>
                 
                 <Box mt={'-50px'} p={[5,5,10,10]} w={["full","410px","410px","410px"]} h={"auto"}>
-                <Heading  color={"#fbbd16"} fontSize={"75px"}>
-                  GIVAA
-                </Heading>
+               
                   <Heading
                     fontFamily={"DM sans"}
                     fontSize={"30px"}
@@ -249,7 +248,7 @@ export default function Login (){
                   </VStack>
                 </Box>
               </Center>
-              <Show above="md">
+              <Show above="lg">
               <Center
                 backgroundColor={"#e8e8ea"}
                 opacity={1}
@@ -266,6 +265,7 @@ export default function Login (){
               </Show>
             
             </Stack>
+            <Footer/>
           </Box>
         </>
       );

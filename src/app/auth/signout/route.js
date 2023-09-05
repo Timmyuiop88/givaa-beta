@@ -21,6 +21,7 @@ export async function POST(req) {
 
   if (session) {
     await supabase.auth.signOut()
+    redirect('/login')
   }
 
   return NextResponse.redirect(new URL('/', req.url), {

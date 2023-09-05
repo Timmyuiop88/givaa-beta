@@ -32,7 +32,7 @@ import {
     AlertDescription,
   } from '@chakra-ui/react'
   import { FcGoogle } from "react-icons/fc";
-
+import Footer from "../footer";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useState, useEffect } from "react";
 export default function Signup (){
@@ -265,6 +265,7 @@ export default function Signup (){
               </Show>
             
             </Stack>
+            <Footer/>
           </Box>
         </>
       );

@@ -30,7 +30,7 @@ export const createServerClient = cache(() => {
     } = await supabase.auth.getUser();
   
     if (!user) {
-      redirect('/sign-in');
+      redirect('/login');
     }
   
     return(
