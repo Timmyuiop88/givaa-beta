@@ -7,7 +7,8 @@ import { redirect } from 'next/navigation';
 
 import Signup from '../components/auth/signup';
   export default async function SignupPage() {
-    const supabase = createServerComponentClient({ cookies });
+    const cookieStore = cookies()
+    const supabase = createServerComponentClient({  cookies: () => cookieStore });
     const { data } = await supabase.auth.getSession();
   
     if (data?.session) {

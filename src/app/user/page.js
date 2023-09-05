@@ -15,7 +15,8 @@ import { redirect } from 'next/navigation';
 
   import NavBar from "../components/user/navBar";
   export default async function User(){
-    const supabase = createServerComponentClient({ cookies });
+    const cookieStore = cookies()
+    const supabase = createServerComponentClient({  cookies: () => cookieStore });
 
     const {
       data: { user },

@@ -6,7 +6,8 @@
 import Login from '../components/auth/login';
   
   export default async function LoginPage() {
-    const supabase = createServerComponentClient({ cookies });
+    const cookieStore = cookies()
+    const supabase = createServerComponentClient({ cookies: () => cookieStore });
     const { data } = await supabase.auth.getSession();
   
     if (data?.session) {

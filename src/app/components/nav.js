@@ -25,7 +25,7 @@ import {
   Input,
   Avatar,
 } from "@chakra-ui/react";
-import NextLink from 'next/link'
+
 import {
   AiOutlineMenu,
   AiFillHome,
