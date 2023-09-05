@@ -7,6 +7,7 @@ import {
     Stack,
     Text,
     Heading,
+    Spinner,
     Button,
     Flex,
     Center,
@@ -39,19 +40,34 @@ export default function Signup (){
     const supabase = createClientComponentClient();
     const [errorMsg, setErrorMsg] = useState(null);
     const [successMsg, setSuccessMsg] = useState(null);
-
+    const [loading, setLoading] = useState(false);
     async function signUp() {
+
+
+      try {
+        setLoading(true);
+  
+       
         const { error } = await supabase.auth.signUp({
-            email,
-            password,
-          // redirectTo: `${window.location.origin}/auth/callback`,
-        });
-    
-        if (error) {
-          setErrorMsg(error.message);
-        } else {
-          setSuccessMsg('Success! Please check your email for further instructions.');
-        }
+          email,
+          password,
+        // redirectTo: `${window.location.origin}/auth/callback`,
+      });
+  
+  
+        if (error) throw error;
+       
+      } catch (error) {
+        
+        setErrorMsg(error.error_description || error.message);
+      } finally {
+        setLoading(false);
+        setSuccessMsg('Success! Please check your email for further instructions.');
+      }
+
+
+
+       
       }
     
 
@@ -71,7 +87,7 @@ export default function Signup (){
         <>
           <Box w={"100%"} h={"100vh"} >
             <Stack w={"100%"} spacing={"0"} h={"100%"} direction={["column","column","row","row"]}>
-              <Center  h={"100%"} w={["100%","100%","50%","50%"]} bg={"white"}>
+              <Center  h={"100%"} w={["100%","100%","100%","50%"]} bg={"white"}>
                 <Box  p={10} w={["full","410px","410px","410px"]} h={"610px"}>
                   <Heading
                     fontFamily={"DM sans"}
@@ -243,12 +259,12 @@ export default function Signup (){
                     fontSize={'14px'}
                     onClick={signUp}
                   >
-         Sign up
+         {loading ? <Spinner /> : 'Sign up'}
                   </Button>
                   </VStack>
                 </Box>
               </Center>
-              <Show above="md">
+              <Show above="lg">
               <Center
                 backgroundColor={"#e8e8ea"}
                 opacity={1}
