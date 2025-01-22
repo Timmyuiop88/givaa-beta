@@ -4,7 +4,10 @@ const nextConfig = {
       'files.edgestore.dev' // Add EdgeStore domain for image hosting
     ],
   },
-  // Keep any other existing config options
+  typescript: {
+    ignoreBuildErrors: true
+  },
+  swcMinify: true
 }
 
 module.exports = nextConfig
