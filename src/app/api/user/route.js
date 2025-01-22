@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { db } from "@/app/lib/db";
+import { db } from "../../lib/db";
 import { hash } from "bcrypt";
 import * as z from 'zod'
-import { rateLimit } from '@/app/lib/rate-limit'
+import { rateLimit } from '../../lib/rate-limit'
 import { Prisma } from '@prisma/client';
 
 const userSchema = z.object({
