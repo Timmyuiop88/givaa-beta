@@ -1,26 +1,17 @@
 
 
-  import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
-  import { redirect } from 'next/navigation';
-import Login from '../components/auth/login';
-import { cookies } from 'next/headers'
-import { cache } from 'react';
+import { getServerSession } from 'next-auth';
 
-export const createServerClient = cache(() => {
-    const cookieStore = cookies()
-    return createServerComponentClient({
-        cookies: () => cookieStore
-    })
-})
+import Login from './components/login';
+import { redirect } from 'next/navigation';
+
   export default async function LoginPage() {
 
-    const supabase = createServerClient()
-    const { data } = await supabase.auth.getSession();
-  
-    if (data?.session) {
-      redirect('/user');
-    }
+    const session = await getServerSession();
+  if(session) {
+    redirect('/user');
+  }
   return(
     <Login/>
 

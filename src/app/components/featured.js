@@ -11,20 +11,39 @@ import {
     Flex,
     Center,
     Hide,
+    Spinner,
   } from "@chakra-ui/react";
   import Fund from "./fund";
-  import { useRef, useEffect, useState } from "react";
+  import { useRef } from "react";
+  import { FaChevronRight, FaChevronLeft } from "react-icons/fa6";
+  import { useQuery } from '@tanstack/react-query';
 
-  import { FaChevronRight,FaChevronLeft } from "react-icons/fa6";
-
-  const ref = { current: {} }
-  const scroll = (scrollOffset) => {
-    ref.current.scrollLeft += scrollOffset;
+  const fetchFeaturedCampaigns = async () => {
+    const response = await fetch('/api/campaigns');
+    if (!response.ok) {
+      throw new Error('Failed to fetch campaigns');
+    }
+    return response.json();
   };
 
 export default function Featured(){
-    return(
+    const scrollRef = useRef(null);
+    
+    const { data: campaigns, isLoading, error } = useQuery({
+      queryKey: ['featuredCampaigns'],
+      queryFn: fetchFeaturedCampaigns,
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    });
 
+    const scroll = (scrollOffset) => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollLeft += scrollOffset;
+      }
+    };
+    
+
+    return(
         <Box
         w={'100%'}
         h={'auto'}
@@ -120,7 +139,7 @@ className="left-arrow"
 </Hide>
  
 <Stack 
-ref={ref}
+ref={scrollRef}
   direction={["row", "row", "row", "row"]}
   overflowX={"scroll"}
   overflowY={'none'}
@@ -140,56 +159,39 @@ ref={ref}
 >
   
 
-   <Fund
-       w={['320px','320px','350px','350px']}
-
-    fundraiserName="Organization "
-    Description="Discover the inspiring stories of individuals and organizations who have used....."
-    CreatedBy="4 Breath 4 Life"
-    Amount="10000"
-    Percent="37"
-    TimeRemaining="250"
-  />
-   <Fund
-    w={['320px','320px','350px','350px']}
-
-    fundraiserName="Organization "
-    Description="Discover the inspiring stories of individuals and organizations who have used....."
-    CreatedBy="4 Breath 4 Life"
-    Amount="10000"
-    Percent="37"
-    TimeRemaining="250"
-  />
-  <Fund
-  w={['320px','320px','350px','350px']}
-
-    fundraiserName="Organization "
-    Description="Discover the inspiring stories of individuals and organizations who have used....."
-    CreatedBy="4 Breath 4 Life"
-    Amount="10000"
-    Percent="37"
-    TimeRemaining="250"
-  />
-  <Fund
-      w={['320px','320px','350px','350px']}
-
-    fundraiserName="Organization "
-    Description="Discover the inspiring stories of individuals and organizations who have used....."
-    CreatedBy="4 Breath 4 Life"
-    Amount="10000"
-    Percent="37"
-    TimeRemaining="250"
-  />
-  <Fund
-       w={['320px','320px','350px','350px']}
-
-    fundraiserName="Organization "
-    Description="Discover the inspiring stories of individuals and organizations who have used....."
-    CreatedBy="4 Breath 4 Life"
-    Amount="10000"
-    Percent="37"
-    TimeRemaining="250"
-  />
+   {isLoading ? (
+    <Center w="full">
+      <Spinner size="xl" color="orange.500" thickness="4px" />
+    </Center>
+  ) : error ? (
+    <Center w="full">
+      <Text color="red.500">Failed to load campaigns</Text>
+    </Center>
+  ) : campaigns?.campaigns.length === 0 ? (
+    <Center w="full">
+      <Text color="gray.500">No campaigns available</Text>
+    </Center>
+  ) : (
+    campaigns?.campaigns.map((campaign) => {
+      const progress = Math.round((campaign.current_amount / campaign.goal_amount) * 100) || 0;
+      const daysLeft = Math.ceil((new Date(campaign.end_date) - new Date()) / (1000 * 60 * 60 * 24));
+      return(
+      <Fund
+        key={campaign.id}
+        w={['320px','320px','350px','350px']}
+        fundraiserName={campaign.title}
+        Description={campaign.description}
+        Amount={campaign.goal_amount.toLocaleString()}
+        Percent={progress}
+        TimeRemaining={daysLeft}
+        coverImage={campaign.cover_image}
+      />
+      )
+    }
+  
+  
+  )
+  )}
   
 </Stack>
 <Hide below="md">

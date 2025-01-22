@@ -1,13 +1,16 @@
 import {Box} from '../../utils/chakra'
-import NavBar from "../../components/user/navBar";
+
+import { getServerSession } from 'next-auth';
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import PageCampain from './components/pagecontent';
 export default async function Campaigns(){
-    
+  const session = await getServerSession();
+  if(!session) {
+    redirect('/login');
+  }
   
     return(
-      <Box minH="100vh" bg={'#edf2f7'}>
-    <NavBar/>
-    <Box ml={{ base: 0, md: 60 }} p="4">
- Campaigns
-      </Box>
-    </Box>)
+      <PageCampain/>
+)
   };

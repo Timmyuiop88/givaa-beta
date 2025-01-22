@@ -1,0 +1,219 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int           @id @default(autoincrement())
+  uuid              String        @unique @default(uuid())
+  email             String        @unique
+  emailVerified     DateTime?
+  password          String?
+  firstname         String?
+  lastname          String?
+  profileImage      String?
+  
+  // Authentication & Security
+  twoFactorEnabled  Boolean       @default(false)
+  twoFactorSecret   String?
+  role              UserRole      @default(USER)
+  status            UserStatus    @default(ACTIVE)
+  
+  // Timestamps
+  lastLoginAt       DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations (keeping existing relations)
+  Campaign          Campaign[]
+  Transaction       Transaction[]
+  Balance           Balance[]
+  Donation          Donation[]
+  sessions          Session[]
+  accounts          Account[]
+}
+
+// NextAuth required models
+model Account {
+  id                String    @id @default(uuid())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?   @db.Text
+  access_token      String?   @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?   @db.Text
+  session_state     String?
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Campaign {
+  campaign_id      Int        @id @default(autoincrement())
+  uuid             String     @unique @default(uuid())
+  userId           Int
+  title            String
+  description      String     @db.Text
+  goal_amount      Float
+  current_amount   Float      @default(0)
+  start_date       DateTime
+  end_date         DateTime
+  status           CampaignStatus @default(DRAFT)
+  visibility       Visibility     @default(PUBLIC)
+  category_id      Int?
+  
+  // Media
+  cover_image      String?
+  gallery          String[]
+  
+  // Verification
+  is_verified      Boolean    @default(false)
+  verified_at      DateTime?
+  
+  // Timestamps
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @updatedAt
+
+  // Relations
+  User             User       @relation(fields: [userId], references: [id])
+  Category         Category?  @relation(fields: [category_id], references: [category_id])
+  Donation         Donation[]
+  updates          CampaignUpdate[]
+
+  @@index([userId])
+  @@index([category_id])
+}
+
+model Donation {
+  donation_id      Int       @id @default(autoincrement())
+  uuid             String    @unique @default(uuid())
+  campaign_id      Int
+  userId           Int?
+  donor_name       String
+  donor_email      String
+  amount           Float
+  currency         String    @default("USD")
+  status           PaymentStatus @default(PENDING)
+  message          String?
+  is_anonymous     Boolean   @default(false)
+  
+  // Payment info
+  payment_method   String?
+  payment_intent_id String?  @unique
+  
+  donation_date    DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  // Relations
+  Campaign         Campaign  @relation(fields: [campaign_id], references: [campaign_id])
+  User             User?     @relation(fields: [userId], references: [id])
+
+  @@index([campaign_id])
+  @@index([userId])
+}
+
+model Transaction {
+  transaction_id   Int      @id @default(autoincrement())
+  uuid             String   @unique @default(uuid())
+  userId           Int
+  transaction_type String
+  amount           Float
+  currency         String   @default("USD")
+  status           PaymentStatus @default(PENDING)
+  timestamp        DateTime
+  
+  // Relations
+  User             User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Balance {
+  balance_id       Int      @id @default(autoincrement())
+  uuid             String   @unique @default(uuid())
+  userId           Int      @unique
+  balance_amount   Float
+  currency         String   @default("USD")
+  last_updated_at  DateTime
+
+  // Relations
+  User             User     @relation(fields: [userId], references: [id])
+}
+
+model Category {
+  category_id   Int        @id @default(autoincrement())
+  name          String     @unique
+  slug          String     @unique
+  description   String?
+  Campaign      Campaign[]
+}
+
+model CampaignUpdate {
+  id          Int      @id @default(autoincrement())
+  campaign_id Int
+  title       String
+  content     String   @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  
+  Campaign    Campaign @relation(fields: [campaign_id], references: [campaign_id])
+
+  @@index([campaign_id])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+enum CampaignStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+}

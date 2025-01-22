@@ -19,14 +19,77 @@ import {
   InputRightElement,
   InputLeftElement,
   SimpleGrid,
-   ButtonGroup
+  Spinner,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  useDisclosure,
+  RadioGroup,
+  Radio,
+  RangeSlider,
+  RangeSliderTrack,
+  RangeSliderFilledTrack,
+  RangeSliderThumb,
+  VStack,
 } from "@chakra-ui/react";
 import { BsFacebook, BsTwitter, BsYoutube, BsInstagram } from "react-icons/bs";
+import { useRef, useState } from "react";
+import { useQuery } from '@tanstack/react-query';
 import Footer from "../components/footer";
 import Nav from "../components/nav";
 import Ready from "../components/ready";
 import Fund from "../components/fund";
+import debounce from 'lodash/debounce';
+
 export default function Explore() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    category: 'all',
+    status: 'ACTIVE',
+    amountRange: [0, 100000],
+    sortBy: 'newest'
+  });
+
+  // Debounced search function
+  const debouncedSearch = useRef(
+    debounce((term) => {
+      setSearchTerm(term);
+    }, 300)
+  ).current;
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['exploreCampaigns', searchTerm, filters],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        search: searchTerm,
+        category: filters.category,
+        status: filters.status,
+        minAmount: filters.amountRange[0],
+        maxAmount: filters.amountRange[1],
+        sortBy: filters.sortBy
+      });
+      const response = await fetch(`/api/campaigns?${params.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch campaigns');
+      return response.json();
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const handleSearch = (e) => {
+    debouncedSearch(e.target.value);
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
   return (
     <Box bg={"#fdfdfd"}>
       <Box
@@ -83,14 +146,15 @@ export default function Explore() {
           <Input
             pl={'50px'}
             fontSize={["22px","25px","25px","25px"]}
-            textAlign={''}
             fontWeight={"300"}
             color={"#ADADAD"}
             placeholder="Search for fundraisers"
             bg={"#F1F1F1"}
+            onChange={handleSearch}
           />
           <InputRightElement alignItems={"center"} p={"3"}>
             <Button
+              onClick={onOpen}
               m={"auto"}
               h={"50px"}
               w={["50px", "50px", "auto", "auto"]}
@@ -115,7 +179,7 @@ export default function Explore() {
                   <path
                     fillRule="evenodd"
                     clipRule="evenodd"
-                    d="M13.1667 10.2918H14.5917C14.7627 11.0459 15.1849 11.7194 15.7891 12.2019C16.3933 12.6844 17.1435 12.9472 17.9167 12.9472C18.6899 12.9472 19.4401 12.6844 20.0443 12.2019C20.6484 11.7194 21.0707 11.0459 21.2417 10.2918H23.1945C23.4044 10.2918 23.6058 10.2084 23.7542 10.06C23.9027 9.91149 23.9861 9.71012 23.9861 9.50016C23.9861 9.2902 23.9027 9.08883 23.7542 8.94037C23.6058 8.7919 23.4044 8.70849 23.1945 8.70849H21.2417C21.0707 7.95446 20.6484 7.28094 20.0443 6.79845C19.4401 6.31597 18.6899 6.05316 17.9167 6.05316C17.1435 6.05316 16.3933 6.31597 15.7891 6.79845C15.1849 7.28094 14.7627 7.95446 14.5917 8.70849H13.1667C12.9567 8.70849 12.7553 8.7919 12.6069 8.94037C12.4584 9.08883 12.375 9.2902 12.375 9.50016C12.375 9.71012 12.4584 9.91149 12.6069 10.06C12.7553 10.2084 12.9567 10.2918 13.1667 10.2918ZM17.9167 7.65294C18.282 7.65294 18.6392 7.76128 18.9429 7.96425C19.2467 8.16723 19.4835 8.45572 19.6233 8.79326C19.7631 9.13079 19.7997 9.50221 19.7284 9.86053C19.6571 10.2189 19.4812 10.548 19.2229 10.8063C18.9645 11.0647 18.6354 11.2406 18.277 11.3119C17.9187 11.3832 17.5473 11.3466 17.2098 11.2068C16.8722 11.067 16.5837 10.8302 16.3808 10.5264C16.1778 10.2226 16.0695 9.86551 16.0695 9.50016C16.0722 9.0111 16.2677 8.54286 16.6136 8.19704C16.9594 7.85122 17.4276 7.65571 17.9167 7.65294ZM5.77778 10.2918H3.1389C2.92893 10.2918 2.72757 10.2084 2.5791 10.06C2.43064 9.91149 2.34723 9.71012 2.34723 9.50016C2.34723 9.2902 2.43064 9.08883 2.5791 8.94037C2.72757 8.7919 2.92893 8.70849 3.1389 8.70849H5.77778C5.98775 8.70849 6.18911 8.7919 6.33758 8.94037C6.48604 9.08883 6.56945 9.2902 6.56945 9.50016C6.56945 9.71012 6.48604 9.91149 6.33758 10.06C6.18911 10.2084 5.98775 10.2918 5.77778 10.2918ZM10.6439 10.2918H8.30056C8.0906 10.2918 7.88924 10.2084 7.74077 10.06C7.5923 9.91149 7.5089 9.71012 7.5089 9.50016C7.5089 9.2902 7.5923 9.08883 7.74077 8.94037C7.88924 8.7919 8.0906 8.70849 8.30056 8.70849H10.6439C10.8539 8.70849 11.0552 8.7919 11.2037 8.94037C11.3522 9.08883 11.4356 9.2902 11.4356 9.50016C11.4356 9.71012 11.3522 9.91149 11.2037 10.06C11.0552 10.2084 10.8539 10.2918 10.6439 10.2918ZM12.7972 17.1529H23.1945C23.4044 17.1529 23.6058 17.2363 23.7542 17.3848C23.9027 17.5333 23.9861 17.7346 23.9861 17.9446C23.9861 18.1546 23.9027 18.3559 23.7542 18.5044C23.6058 18.6529 23.4044 18.7363 23.1945 18.7363H12.7972C12.6262 19.4903 12.204 20.1638 11.5998 20.6463C10.9956 21.1288 10.2454 21.3916 9.47223 21.3916C8.69904 21.3916 7.94882 21.1288 7.34465 20.6463C6.74048 20.1638 6.31824 19.4903 6.14723 18.7363H3.1389C2.92893 18.7363 2.72757 18.6529 2.5791 18.5044C2.43064 18.3559 2.34723 18.1546 2.34723 17.9446C2.34723 17.7346 2.43064 17.5333 2.5791 17.3848C2.72757 17.2363 2.92893 17.1529 3.1389 17.1529H6.14723C6.31824 16.3989 6.74048 15.7254 7.34465 15.2429C7.94882 14.7604 8.69904 14.4976 9.47223 14.4976C10.2454 14.4976 10.9956 14.7604 11.5998 15.2429C12.204 15.7254 12.6262 16.3989 12.7972 17.1529ZM8.44623 19.4804C8.75023 19.6831 9.10701 19.7918 9.47223 19.7918C9.96129 19.7891 10.4295 19.5935 10.7754 19.2477C11.1212 18.9019 11.3167 18.4337 11.3195 17.9446C11.3195 17.6254 11.2368 17.3117 11.0796 17.034C10.9223 16.7563 10.6957 16.5241 10.422 16.36C10.1482 16.1959 9.83666 16.1055 9.5176 16.0977C9.19854 16.0899 8.88289 16.1648 8.60143 16.3153C8.31996 16.4657 8.08227 16.6865 7.91154 16.9562C7.74081 17.2258 7.64285 17.5351 7.62722 17.8539C7.61159 18.1727 7.67882 18.49 7.82236 18.7751C7.96589 19.0602 8.18083 19.3032 8.44623 19.4804Z"
+                    d="M13.1667 10.2918H14.5917C14.7627 11.0459 15.1849 11.7194 15.7891 12.2019C16.3933 12.6844 17.1435 12.9472 17.9167 12.9472C18.6899 12.9472 19.4401 12.6844 20.0443 12.2019C20.6484 11.7194 21.0707 11.0459 21.2417 10.2918H23.1945C23.4044 10.2918 23.6058 10.2084 23.7542 10.06C23.9027 9.91149 23.9861 9.71012 23.9861 9.50016C23.9861 9.2902 23.9027 9.08883 23.7542 8.94037C23.6058 8.7919 23.4044 8.70849 23.1945 8.70849H21.2417C21.0707 7.95446 20.6484 7.28094 20.0443 6.79845C19.4401 6.31597 18.6899 6.05316 17.9167 6.05316C17.1435 6.05316 16.3933 6.31597 15.7891 6.79845C15.1849 7.28094 14.7627 7.95446 14.5917 8.70849H13.1667C12.9567 8.70849 12.7553 8.7919 12.6069 8.94037C12.4584 9.08883 12.375 9.2902 12.375 9.50016C12.375 9.71012 12.4584 9.91149 12.6069 10.06C12.7553 10.2084 12.9567 10.2918 13.1667 10.2918Z"
                     fill="#333333"
                   />
                 </svg>
@@ -124,54 +188,102 @@ export default function Explore() {
           </InputRightElement>
         </InputGroup>
 
-<Box  
-
-w={'100%'}
-pt={'50px'}
-pl={'10px'}
-pr={'10px'}
-
->
-<SimpleGrid m={'auto'}  justifyContent={'center'} maxW={'7xl'} minChildWidth='350px' spacing='10px' >
-  
-<Fund
-    w={['full','full','350px','350px']}
-
-    fundraiserName="Organization "
-    Description="Discover the inspiring stories of individuals and organizations who have used....."
-    CreatedBy="4 Breath 4 Life"
-    Amount="10000"
-    Percent="37"
-    TimeRemaining="250"
-  />
-    <Fund
-          w={['full','full','350px','350px']}
-    fundraiserName="Organization "
-    Description="Discover the inspiring stories of individuals and organizations who have used....."
-    CreatedBy="4 Breath 4 Life"
-    Amount="10000"
-    Percent="37"
-    TimeRemaining="250"
-  />
-    <Fund
-    w={['full','full','350px','350px']}
-    fundraiserName="Organization "
-    Description="Discover the inspiring stories of individuals and organizations who have used....."
-    CreatedBy="4 Breath 4 Life"
-    Amount="10000"
-    Percent="37"
-    TimeRemaining="250"
-  />
-</SimpleGrid>
-
-
-</Box>
-
-
+        <Box w={'100%'} pt={'50px'} pl={'10px'} pr={'10px'}>
+          <SimpleGrid m={'auto'} justifyContent={'center'} maxW={'7xl'} minChildWidth='350px' spacing='10px'>
+            {isLoading ? (
+              <Center w="full" h="200px">
+                <Spinner size="xl" color="orange.500" thickness="4px" />
+              </Center>
+            ) : error ? (
+              <Center w="full" h="200px">
+                <Text color="red.500">Failed to load campaigns</Text>
+              </Center>
+            ) : data?.campaigns.length === 0 ? (
+              <Center w="full" h="200px">
+                <Text color="gray.500">No campaigns found</Text>
+              </Center>
+            ) : (
+              data?.campaigns.map((campaign) => {
+                const progress = Math.round((campaign.current_amount / campaign.goal_amount) * 100) || 0;
+                const daysLeft = Math.ceil((new Date(campaign.end_date) - new Date()) / (1000 * 60 * 60 * 24));
+                return (
+                  <Fund
+                    key={campaign.campaign_id}
+                    w={['full','full','350px','350px']}
+                    fundraiserName={campaign.title}
+                    Description={campaign.description}
+                    Amount={campaign.goal_amount}
+                    Percent={progress}
+                    TimeRemaining={daysLeft}
+                    coverImage={campaign.cover_image}
+                  />
+                );
+              })
+            )}
+          </SimpleGrid>
+        </Box>
       </Box>
+
+      {/* Filter Drawer */}
+      <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader borderBottomWidth="1px">Filter Campaigns</DrawerHeader>
+          <DrawerBody>
+            <VStack spacing={6} align="stretch">
+              <Box>
+                <Text mb={2} fontWeight="bold">Category</Text>
+                <RadioGroup value={filters.category} onChange={(value) => handleFilterChange('category', value)}>
+                  <VStack align="start">
+                    <Radio value="all">All Categories</Radio>
+                    <Radio value="medical">Medical</Radio>
+                    <Radio value="education">Education</Radio>
+                    <Radio value="emergency">Emergency</Radio>
+                    <Radio value="community">Community</Radio>
+                  </VStack>
+                </RadioGroup>
+              </Box>
+
+              <Box>
+                <Text mb={2} fontWeight="bold">Amount Range</Text>
+                <RangeSlider
+                  defaultValue={filters.amountRange}
+                  min={0}
+                  max={100000}
+                  step={1000}
+                  onChange={(value) => handleFilterChange('amountRange', value)}
+                >
+                  <RangeSliderTrack>
+                    <RangeSliderFilledTrack bg="orange.400" />
+                  </RangeSliderTrack>
+                  <RangeSliderThumb index={0} />
+                  <RangeSliderThumb index={1} />
+                </RangeSlider>
+                <Text mt={2} fontSize="sm" color="gray.600">
+                  ${filters.amountRange[0]} - ${filters.amountRange[1]}
+                </Text>
+              </Box>
+
+              <Box>
+                <Text mb={2} fontWeight="bold">Sort By</Text>
+                <RadioGroup value={filters.sortBy} onChange={(value) => handleFilterChange('sortBy', value)}>
+                  <VStack align="start">
+                    <Radio value="newest">Newest First</Radio>
+                    <Radio value="oldest">Oldest First</Radio>
+                    <Radio value="goal_high">Highest Goal</Radio>
+                    <Radio value="goal_low">Lowest Goal</Radio>
+                    <Radio value="progress">Most Progress</Radio>
+                  </VStack>
+                </RadioGroup>
+              </Box>
+            </VStack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+
       <Ready />
       <Footer />
     </Box>
-    
   );
 }

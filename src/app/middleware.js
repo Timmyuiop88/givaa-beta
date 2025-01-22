@@ -1,24 +1,30 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
 import { NextResponse } from 'next/server'
 
-export async function middleware(req) {
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, '5 m'),
+})
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
- 
-
-  // if user is not signed in and the current path is not / redirect the user to /
-  if (!user && req.nextUrl.pathname !== '/') {
-    return NextResponse.redirect(new URL('/', req.url))
+export async function middleware(request) {
+  const ip = request.headers.get('x-forwarded-for')
+  const { success, limit, reset, remaining } = await ratelimit.limit(ip)
+  
+  if (!success) {
+    return new NextResponse('Too Many Requests', {
+      status: 429,
+      headers: {
+        'X-RateLimit-Limit': limit.toString(),
+        'X-RateLimit-Remaining': remaining.toString(),
+        'X-RateLimit-Reset': reset.toString(),
+      },
+    })
   }
-
-  return res
+  
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/', '/account'],
-}
+  matcher: '/api/auth/:path*',
+} 

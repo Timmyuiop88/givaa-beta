@@ -172,7 +172,7 @@ justifyContent={'center'}
       <Image
       
      
-      src="images/hero.svg"
+      src="/images/hero.svg"
       m={'auto'}
       width={'500'}
       height={'400'}
