@@ -47,10 +47,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@types/node": "22.10.7",
-    "@types/react": "18.3.18",
-    "prisma": "^5.12.1",
-    "typescript": "5.7.3"
+    "prisma": "^5.12.1"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
