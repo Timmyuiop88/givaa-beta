@@ -1,32 +1,24 @@
 'use client'
 import {
   Avatar,
-  AvatarBadge,
-  AvatarGroup,
   Box,
-  Stack,
   Text,
   Heading,
   Button,
-  Flex,
-  Center,
-  Hide,
-  Wrap,
-  WrapItem,
   Progress,
   Card,
-  CardHeader,
   CardBody,
-  CardFooter,
-  Divider,
-  ButtonGroup,
-  OrderedList,
-  ListItem
+  HStack,
+  VStack,
+  Tag,
+  Icon,
 } from "@chakra-ui/react";
 import Image from 'next/image'
-import { BiSolidUserCircle } from "react-icons/bi";
+import { FiClock, FiTrendingUp } from "react-icons/fi";
+import { useRouter } from 'next/navigation';
 
 export default function Fund(props) {
+  const router = useRouter();
   const {
     w,
     fundraiserName,
@@ -34,61 +26,138 @@ export default function Fund(props) {
     Amount,
     TimeRemaining,
     Percent,
-    coverImage
+    coverImage,
+    id
   } = props;
     
+  const handleClick = () => {
+    router.push(`/fundraiser/${id}`);
+  };
+
   return (
-    <Card minW={w} maxW={w} m={'auto'} bg={'none'} border={'none'} boxShadow={'none'}>
-      <CardBody>
+    <Card 
+      minW={w} 
+      maxW={w} 
+      m={'auto'} 
+      bg={'white'} 
+      border={'1px solid'}
+      borderColor={'gray.100'}
+      borderRadius={'2xl'}
+      overflow="hidden"
+      cursor="pointer"
+      transition="all 0.3s ease"
+      _hover={{ 
+        transform: 'translateY(-8px)',
+        shadow: 'xl',
+        borderColor: 'yellow.400',
+      }}
+      onClick={handleClick}
+      position="relative"
+    >
+      <Box position="relative" h="200px">
         <Image
-          width={'348'}
-          height={'232'}
+          fill
+          style={{ objectFit: 'cover' }}
           src={coverImage || '/images/donate.png'}
           alt={fundraiserName}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        <Stack mt='6' spacing='10px'>
+        {Percent >= 75 && (
+          <Tag
+            position="absolute"
+            top={4}
+            right={4}
+            colorScheme="yellow"
+            borderRadius="full"
+            px={3}
+            py={1}
+            fontSize="xs"
+            fontWeight="bold"
+            display="flex"
+            alignItems="center"
+            gap={1}
+          >
+            <Icon as={FiTrendingUp} />
+            Trending
+          </Tag>
+        )}
+      </Box>
+
+      <CardBody p={5}>
+        <VStack align="stretch" spacing={4}>
           <Heading 
-            fontSize={'15px'}
-            fontWeight={'700'}
-            lineHeight={'24px'}
+            size="md"
+            noOfLines={2}
+            lineHeight="1.4"
           >
             {fundraiserName}
           </Heading>
-          <Progress borderRadius={'6px'} size='sm' value={Percent} />
-          <Box
-            display={'flex'}
-            justifyContent={'space-between'}
-            w={'100%'}
-            h={'auto'}
-            alignItems={'center'}
-          >
-            <Text>
-              ${Amount?.toLocaleString()} Goal
-            </Text>
-            <Text>
-              {TimeRemaining} days left
-            </Text>
-          </Box>
+
           <Text
-            color={'#767676'}
-            fontSize={'14px'}
-            fontStyle={'italic'}
-            fontWeight={'300'}
-            lineHeight={'21px'}
+            color={'gray.600'}
+            fontSize={'sm'}
+            noOfLines={2}
+            lineHeight="1.6"
           >
             {Description}
           </Text>
-          
+
+          <Box>
+            <Progress 
+              value={Percent} 
+              size="sm" 
+              borderRadius="full" 
+              colorScheme="yellow"
+              bg="gray.100"
+              hasStripe
+              isAnimated
+            />
+            <HStack justify="space-between" mt={2} fontSize="sm" color="gray.600">
+              <Text fontWeight="medium">{Percent}% Funded</Text>
+              <HStack spacing={1}>
+                <Icon as={FiClock} />
+                <Text>{TimeRemaining} days left</Text>
+              </HStack>
+            </HStack>
+          </Box>
+
+          <Box 
+            p={4} 
+            bg="gray.50" 
+            borderRadius="xl"
+          >
+            <VStack spacing={1}>
+              <Text fontSize="2xl" fontWeight="bold" color="green.500">
+                ${Amount?.toLocaleString()}
+              </Text>
+              <Text fontSize="sm" color="gray.500">
+                Goal Amount
+              </Text>
+            </VStack>
+          </Box>
+
           <Button
-            borderRadius={'20px'}
-            bg={'#FFBE37'}
-            color={'#fdfdfd'}
+            size="lg"
+            bg="#FFBE37"
+            color="white"
+            _hover={{ 
+              bg: "#FFD700",
+              transform: 'translateY(-2px)',
+              shadow: 'md'
+            }}
+            _active={{
+              bg: "#FFBE37",
+              transform: 'translateY(0)',
+            }}
+            borderRadius="xl"
+            fontWeight="bold"
+            transition="all 0.2s"
+            w="full"
           >
             Donate now
           </Button>
-        </Stack>
+        </VStack>
       </CardBody>
-      <CardFooter></CardFooter>
     </Card>
   );
 }

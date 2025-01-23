@@ -5,17 +5,13 @@ import { authOptions } from "../../../lib/nextAuth";
 
 export async function GET(request, { params }) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+    const { searchParams } = new URL(request.url);
+    const includeDonors = searchParams.get('include_donors') === 'true';
     const { id } = params;
 
     const campaign = await db.campaign.findFirst({
       where: {
         campaign_id: parseInt(id),
-        userId: parseInt(session.user.id),
       },
       include: {
         Category: {
@@ -24,7 +20,33 @@ export async function GET(request, { params }) {
             name: true,
             slug: true
           }
-        }
+        },
+        updates: {
+          orderBy: {
+            created_at: 'desc'
+          }
+        },
+        ...(includeDonors && {
+          Donation: {
+            orderBy: {
+              donation_date: 'desc'
+            },
+            select: {
+              donation_id: true,
+              donor_name: true,
+              amount: true,
+              message: true,
+              is_anonymous: true,
+              donation_date: true,
+              status: true,
+              User: {
+                select: {
+                  profileImage: true
+                }
+              }
+            }
+          }
+        })
       }
     });
 
@@ -32,11 +54,18 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
     }
 
+    // Format the campaign data
     const campaignWithStats = {
       ...campaign,
       progress_percentage: Math.round(
         (campaign.current_amount / campaign.goal_amount) * 100
       ),
+      donations: includeDonors ? campaign.Donation.map(donation => ({
+        ...donation,
+        donor_avatar: donation.User?.profileImage,
+        // Remove sensitive or unnecessary fields
+        User: undefined
+      })) : undefined
     };
 
     return NextResponse.json(campaignWithStats);

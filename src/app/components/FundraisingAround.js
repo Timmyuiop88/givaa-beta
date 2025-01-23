@@ -14,11 +14,42 @@ import {
     Wrap, 
     WrapItem,
     Spinner,
+    Skeleton,
+    SkeletonText,
+    Card,
+    CardBody,
+    VStack,
+    Progress,
 } from "@chakra-ui/react";
 import { useRef } from "react";
 import Fund from "./fund";
 import { FaChevronRight, FaChevronLeft } from "react-icons/fa6";
 import { useQuery } from '@tanstack/react-query';
+
+// Add FundSkeleton component
+const FundSkeleton = ({ w }) => (
+  <Card 
+    minW={w} 
+    maxW={w} 
+    m={'auto'} 
+    bg={'white'} 
+    border={'1px solid'}
+    borderColor={'gray.100'}
+    borderRadius={'2xl'}
+    overflow="hidden"
+  >
+    <Skeleton height="200px" />
+    <CardBody p={5}>
+      <VStack align="stretch" spacing={4}>
+        <SkeletonText noOfLines={2} spacing={2} />
+        <SkeletonText noOfLines={2} spacing={2} />
+        <Skeleton height="8px" borderRadius="full" />
+        <Skeleton height="80px" borderRadius="xl" />
+        <Skeleton height="48px" borderRadius="xl" />
+      </VStack>
+    </CardBody>
+  </Card>
+);
 
 const fetchNearbyCampaigns = async () => {
   const response = await fetch('/api/campaigns?type=nearby');
@@ -35,7 +66,7 @@ export default function Around() {
       queryKey: ['nearbyCampaigns'],
       queryFn: fetchNearbyCampaigns,
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+      staleTime: 1000 * 60 * 5,
     });
 
     const scroll = (scrollOffset) => {
@@ -125,11 +156,12 @@ export default function Around() {
                       m={"auto"}
                       w={"100%"}
                       pt={10}
+                      spacing={6}
                     >
                       {isLoading ? (
-                        <Center w="full">
-                          <Spinner size="xl" color="orange.500" thickness="4px" />
-                        </Center>
+                        Array(4).fill(0).map((_, index) => (
+                          <FundSkeleton key={index} w={['320px','320px','350px','350px']} />
+                        ))
                       ) : error ? (
                         <Center w="full">
                           <Text color="red.500">Failed to load campaigns</Text>
