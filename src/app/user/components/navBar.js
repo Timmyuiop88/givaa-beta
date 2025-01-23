@@ -3,19 +3,13 @@
 import {
   Avatar,
   Box,
-  Collapse,
   Drawer,
   DrawerContent,
-  DrawerOverlay,
   Flex,
   Icon,
   IconButton,
   CloseButton,
-  Input,
-  InputGroup,
-  InputLeftElement,
   Text,
-  useColorModeValue,
   useDisclosure,
   HStack,
   Menu,
@@ -27,106 +21,91 @@ import {
   Button,
 } from "@chakra-ui/react";
 import Link from "next/link";
-import { FiMenu, FiSearch, FiCompass, FiStar, FiSettings, FiBell, FiLogOut, FiUser, FiChevronDown } from "react-icons/fi";
+import { 
+  FiMenu, 
+  FiSettings, 
+  FiBell, 
+  FiLogOut, 
+  FiUser, 
+  FiChevronDown,
+  FiHome,
+  FiDollarSign,
+  FiBarChart2,
+  FiCreditCard,
+  FiCheckCircle,
+  FiActivity
+} from "react-icons/fi";
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 const LinkItems = [
-  {
-    name: "Overview",
-    icon: (
-      <svg
-        width="22"
-        height="23"
-        viewBox="0 0 22 23"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <g clipPath="url(#clip0_482_1046)">
-          <path
-            d="M9.17404 3.4458H2.79419V9.82565H9.17404V3.4458Z"
-            stroke="currentColor"
-            strokeWidth="1.56241"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M20.7591 2.00635H12.947V9.81841H20.7591V2.00635Z"
-            stroke="currentColor"
-            strokeWidth="1.56241"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M19.1997 13.4714H12.8198V19.8513H19.1997V13.4714Z"
-            stroke="currentColor"
-            strokeWidth="1.56241"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M9.17404 13.4714H2.79419V19.8513H9.17404V13.4714Z"
-            stroke="currentColor"
-            strokeWidth="1.56241"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </g>
-        <defs>
-          <clipPath id="clip0_482_1046">
-            <rect
-              width="21.8738"
-              height="21.8738"
-              fill="white"
-              transform="translate(0.0603027 0.71167)"
-            />
-          </clipPath>
-        </defs>
-      </svg>
-    ),
+  { 
+    name: "Dashboard", 
+    icon: FiHome, 
     path: "/user",
+    description: "Overview & analytics"
   },
   { 
-    name: "Campaigns", 
-    icon: (
-      <svg width="22" height="23" viewBox="0 0 22 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10.9974 2.28198L1.8833 6.83902L10.9974 11.3961L20.1114 6.83902L10.9974 2.28198Z" stroke="currentColor" strokeWidth="1.56241" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M1.8833 15.9531L10.9974 20.5102L20.1114 15.9531" stroke="currentColor" strokeWidth="1.56241" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M1.8833 11.396L10.9974 15.953L20.1114 11.396" stroke="currentColor" strokeWidth="1.56241" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ), 
-    path: "/user/campaigns" 
+    name: "My Campaigns", 
+    icon: FiBarChart2, 
+    path: "/user/campaigns",
+    description: "Manage your fundraisers"
   },
-  { name: "Explore", icon: FiCompass, path: "/user/explore" },
-  { name: "Favourites", icon: FiStar, path: "/user/favourites" },
-  { name: "Settings", icon: FiSettings, path: "/user/settings" },
+  { 
+    name: "Transactions", 
+    icon: FiDollarSign, 
+    path: "/user/transactions",
+    description: "Payment history"
+  },
+  { 
+    name: "Verification", 
+    icon: FiCheckCircle, 
+    path: "/user/verification",
+    description: "Account verification status"
+  },
+  { 
+    name: "Payout Methods", 
+    icon: FiCreditCard, 
+    path: "/user/payouts",
+    description: "Manage withdrawal options"
+  },
+  { 
+    name: "Activity Log", 
+    icon: FiActivity, 
+    path: "/user/activity",
+    description: "Recent account activities"
+  }
 ];
 
 const SidebarContent = ({ onClose, ...rest }) => {
   return (
     <Box
-      transition="3s ease"
-      bg={useColorModeValue("white", "white")}
+      bg="white"
       borderRight="1px"
-      borderRightColor={useColorModeValue("gray.200", "gray.700")}
-      w={{ base: "60%", md: 60 }}
-      pos="fixed"
-      h="full"
+      borderRightColor="gray.200"
+      w="full"
+      h="100vh"
+      position="fixed"
       {...rest}
     >
-      <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
+      <Flex h="16" alignItems="center" mx="4" justifyContent="space-between">
         <Text
-          display={{ base: "flex", md: "none" }}
           fontSize="2xl"
           fontWeight="bold"
+          color="#f68950"
         >
           GIVAA
         </Text>
-        <CloseButton display={{ base: "flex", md: "flex" }} onClick={onClose} />
+        <CloseButton onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
         <NavItem key={link.name} icon={link.icon} path={link.path}>
-          {link.name}
+          <VStack align="start" spacing={0}>
+            <Text fontSize="14px">{link.name}</Text>
+            <Text fontSize="12px" color="gray.500">
+              {link.description}
+            </Text>
+          </VStack>
         </NavItem>
       ))}
     </Box>
@@ -134,34 +113,31 @@ const SidebarContent = ({ onClose, ...rest }) => {
 };
 
 const NavItem = ({ icon, children, path, ...rest }) => {
-  const IconComponent = typeof icon === 'function' ? icon : () => icon;
-  
   return (
     <Link href={path} style={{ textDecoration: "none" }}>
       <Flex
         align="center"
-        p="4"
+        p="3"
         mx="4"
         borderRadius="lg"
         role="group"
         cursor="pointer"
+        color="gray.600"
         _hover={{
-          bg: "#f68950",
-          color: "white",
+          bg: "#fff5ef",
+          color: "#f68950",
         }}
         {...rest}
       >
         {icon && (
-          <Box
-            as="span"
+          <Icon
             mr="4"
             fontSize="16"
+            as={icon}
             _groupHover={{
-              color: "white",
+              color: "#f68950",
             }}
-          >
-            {typeof icon === 'function' ? <Icon as={IconComponent} /> : icon}
-          </Box>
+          />
         )}
         {children}
       </Flex>
@@ -169,7 +145,7 @@ const NavItem = ({ icon, children, path, ...rest }) => {
   );
 };
 
-const MobileNav = ({ onOpen, ...rest }) => {
+const MobileNav = ({ onOpen, isOpen, ...rest }) => {
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -184,18 +160,19 @@ const MobileNav = ({ onOpen, ...rest }) => {
 
   return (
     <Flex
-      ml={{ base: 0, md: 0 }}
-      px={{ base: 4, md: "50px" }}
-      height="20"
+      px="4"
+      height="14"
       alignItems="center"
-      bg={useColorModeValue("white", "gray.800")}
+      bg="white"
       borderBottomWidth="1px"
-      borderBottomColor={useColorModeValue("gray.200", "gray.700")}
-      justifyContent={{ base: "space-between", md: "space-between" }}
+      borderBottomColor="gray.200"
+      position="fixed"
+      top="0"
+      w="100%"
+      zIndex={2}
       {...rest}
     >
       <IconButton
-        display={{ base: "flex", md: "flex" }}
         onClick={onOpen}
         variant="outline"
         aria-label="open menu"
@@ -203,71 +180,77 @@ const MobileNav = ({ onOpen, ...rest }) => {
       />
 
       <Text
-        display={{ base: "flex", md: "flex" }}
         fontSize="2xl"
         fontWeight="bold"
-        color={'#f68950'}
+        color="#f68950"
+        ml="4"
       >
         GIVAA
       </Text>
 
-      <HStack spacing={{ base: "0", md: "6" }}>
+      <HStack spacing="4" ml="auto">
+        
         <IconButton
-          size="lg"
+          size="md"
           variant="ghost"
           aria-label="notifications"
           icon={<FiBell />}
         />
-        <Flex alignItems={"center"}>
-          <Menu>
-            <MenuButton
-              py={2}
-              transition="all 0.3s"
-              _focus={{ boxShadow: "none" }}
-            >
-              <HStack>
-                <Avatar
-                  size={"sm"}
-                  name={session?.user?.name || 'User'}
-                  src={session?.user?.image}
-                />
-                <VStack
-                  display={{ base: "none", md: "flex" }}
-                  alignItems="flex-start"
-                  spacing="1px"
-                  ml="2"
-                >
-                  <Text fontSize="sm">{session?.user?.name || 'User'}</Text>
-                  <Text fontSize="xs" color="gray.600">
-                    {session?.user?.email}
-                  </Text>
-                </VStack>
-                <Box display={{ base: "none", md: "flex" }}>
-                  <FiChevronDown />
-                </Box>
-              </HStack>
-            </MenuButton>
-            <MenuList>
-              <Link href="/user/profile">
-                <MenuItem icon={<FiUser />}>Profile</MenuItem>
-              </Link>
-              <Link href="/user/settings">
-                <MenuItem icon={<FiSettings />}>Settings</MenuItem>
-              </Link>
-              <MenuDivider />
-              <MenuItem 
-                icon={<FiLogOut />} 
-                onClick={handleLogout}
-                color="red.500"
-                _hover={{
-                  bg: 'red.50',
-                }}
+
+        <Menu>
+          <MenuButton
+            py={2}
+            transition="all 0.3s"
+            _focus={{ boxShadow: "none" }}
+          >
+            <HStack>
+              <Avatar
+                size={"sm"}
+                name={session?.user?.name || 'User'}
+                src={session?.user?.image}
+                bg="#f68950"
+              />
+              <VStack
+                display={{ base: "none", md: "flex" }}
+                alignItems="flex-start"
+                spacing="1px"
+                ml="2"
               >
-                Logout
-              </MenuItem>
-            </MenuList>
-          </Menu>
-        </Flex>
+                <Text fontSize="sm" fontWeight="medium">
+                  {session?.user?.name || 'User'}
+                </Text>
+                <Text fontSize="xs" color="gray.500">
+                  {session?.user?.email}
+                </Text>
+              </VStack>
+              <Box display={{ base: "none", md: "flex" }}>
+                <FiChevronDown />
+              </Box>
+            </HStack>
+          </MenuButton>
+          <MenuList
+            bg="white"
+            borderColor="gray.200"
+          >
+            <Link href="/user/profile">
+              <MenuItem icon={<FiUser />}>Profile</MenuItem>
+            </Link>
+            <Link href="/user/settings">
+              <MenuItem icon={<FiSettings />}>Settings</MenuItem>
+            </Link>
+            <MenuDivider />
+            <MenuItem 
+              icon={<FiLogOut />} 
+              onClick={handleLogout}
+              color="red.500"
+              _hover={{
+                bg: 'red.50',
+              }}
+            >
+              Logout
+            </MenuItem>
+          </MenuList>
+        </Menu>
       </HStack>
     </Flex>
   );
@@ -277,25 +260,33 @@ const NavBar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <>
-      <SidebarContent
-        onClose={() => onClose}
-        display={{ base: "none", md: "none" }}
-      />
+    <Box position="relative">
+      {/* Mobile Drawer */}
       <Drawer
         isOpen={isOpen}
         placement="left"
         onClose={onClose}
         returnFocusOnClose={false}
         onOverlayClick={onClose}
-        size="full"
       >
-        <DrawerContent bg={'none'} onClick={onClose}>
+        <DrawerContent>
           <SidebarContent onClose={onClose} />
         </DrawerContent>
       </Drawer>
-      <MobileNav onOpen={onOpen} />
-    </>
+
+      {/* Main Content */}
+      <Box
+        ml={0}
+        transition="margin-left 0.3s"
+        position="relative"
+        w="100vw"
+      >
+        <MobileNav onOpen={onOpen} isOpen={isOpen} />
+        <Box mt="14" mx="0" px="0">
+          {/* Page content will be rendered here */}
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

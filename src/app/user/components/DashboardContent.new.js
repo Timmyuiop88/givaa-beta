@@ -13,11 +13,9 @@ import {
   Button,
   Flex,
   Divider,
+  Spinner,
   useToast,
-  Center,
-  Skeleton,
-  SkeletonText,
-  SkeletonCircle
+  Center
 } from '@chakra-ui/react';
 import {
   FiDollarSign,
@@ -26,21 +24,15 @@ import {
   FiCreditCard,
   FiArrowRight
 } from 'react-icons/fi';
-import NavBar from './navBar';
 
 const StatCard = ({ title, value, icon: Icon, change, helperText, isLoading }) => {
   if (isLoading) {
     return (
       <Card>
         <CardBody>
-          <Flex justify="space-between" align="start">
-            <Box flex="1">
-              <SkeletonText noOfLines={1} width="80px" mb={2} />
-              <Skeleton height="28px" width="120px" mb={2} />
-              <SkeletonText noOfLines={2} width="100px" />
-            </Box>
-            <Skeleton borderRadius="lg" height="36px" width="36px" />
-          </Flex>
+          <Center minH="100px">
+            <Spinner color="orange.500" />
+          </Center>
         </CardBody>
       </Card>
     );
@@ -59,13 +51,10 @@ const StatCard = ({ title, value, icon: Icon, change, helperText, isLoading }) =
               {title}
             </Text>
             <Text fontSize="2xl" fontWeight="bold" mt={2}>
-              {title === "Total Donors" ? value : `$${value.toFixed(2)}`}
-            </Text>
-            <Text fontSize="sm" color={changeColor} mt={1}>
-              {changeText}
+              {typeof value === 'number' ? `$${value.toFixed(2)}` : value}
             </Text>
             {helperText && (
-              <Text fontSize="sm" color="gray.500">
+              <Text fontSize="sm" color="gray.500" mt={1}>
                 {helperText}
               </Text>
             )}
@@ -87,6 +76,16 @@ const StatCard = ({ title, value, icon: Icon, change, helperText, isLoading }) =
 const BalanceCard = ({ balance, pendingBalance, isLoading }) => {
   const toast = useToast();
 
+  const handleWithdraw = () => {
+    toast({
+      title: "Coming Soon",
+      description: "Withdrawal functionality will be available soon.",
+      status: "info",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
   if (isLoading) {
     return (
       <Card
@@ -97,21 +96,9 @@ const BalanceCard = ({ balance, pendingBalance, isLoading }) => {
         mb={6}
       >
         <CardBody p={6}>
-          <VStack align="stretch" spacing={6}>
-            <Box>
-              <SkeletonText noOfLines={1} width="120px" speed={1} />
-              <Skeleton height="40px" width="200px" mt={2} speed={1} />
-            </Box>
-            <Box>
-              <SkeletonText noOfLines={1} width="120px" speed={1} />
-              <Skeleton height="32px" width="150px" mt={2} speed={1} />
-              <SkeletonText noOfLines={1} width="180px" mt={1} speed={1} />
-            </Box>
-            <HStack spacing={4}>
-              <Skeleton height="32px" width="120px" speed={1} />
-              <Skeleton height="32px" width="100px" speed={1} />
-            </HStack>
-          </VStack>
+          <Center minH="200px">
+            <Spinner color="white" size="xl" />
+          </Center>
         </CardBody>
       </Card>
     );
@@ -149,13 +136,7 @@ const BalanceCard = ({ balance, pendingBalance, isLoading }) => {
               _hover={{ bg: "gray.100" }}
               size="sm"
               leftIcon={<FiCreditCard />}
-              onClick={() => toast({
-                title: "Coming Soon",
-                description: "Withdrawal functionality will be available soon.",
-                status: "info",
-                duration: 3000,
-                isClosable: true,
-              })}
+              onClick={handleWithdraw}
             >
               Withdraw Funds
             </Button>
@@ -186,85 +167,47 @@ const CampaignProgress = ({ stats, isLoading }) => {
     return (
       <Card borderRadius="xl" boxShadow="sm">
         <CardBody>
-          <SkeletonText noOfLines={1} width="150px" mb={6} />
-          <Skeleton height="8px" mb={6} borderRadius="full" />
-          <SimpleGrid columns={3} spacing={4}>
-            {[1, 2, 3].map((i) => (
-              <Box key={i} textAlign="center" p={4} bg="gray.50" borderRadius="lg">
-                <Skeleton height="28px" mb={2} />
-                <SkeletonText noOfLines={1} width="60px" mx="auto" />
-              </Box>
-            ))}
-          </SimpleGrid>
+          <Center minH="200px">
+            <Spinner color="orange.500" size="xl" />
+          </Center>
         </CardBody>
       </Card>
     );
   }
 
-  const total = (stats.active || 0) + (stats.completed || 0) + (stats.draft || 0);
-  const activePercent = total > 0 ? ((stats.active || 0) / total) * 100 : 0;
-  const completedPercent = total > 0 ? ((stats.completed || 0) / total) * 100 : 0;
-  const draftPercent = total > 0 ? ((stats.draft || 0) / total) * 100 : 0;
-
   return (
     <Card borderRadius="xl" boxShadow="sm">
       <CardBody>
-        <Text fontSize="lg" fontWeight="semibold" mb={6}>
+        <Text fontSize="lg" fontWeight="semibold" mb={4}>
           Campaign Progress
         </Text>
-        
-        <Box mb={6} position="relative">
-          <Box
-            w="100%"
-            h="8px"
-            bg="gray.100"
-            borderRadius="full"
-            overflow="hidden"
-            display="flex"
-          >
-            <Box
-              w={`${activePercent}%`}
-              h="100%"
-              bg="orange.400"
-              transition="width 0.3s ease"
-            />
-            <Box
-              w={`${completedPercent}%`}
-              h="100%"
-              bg="green.400"
-              transition="width 0.3s ease"
-            />
-            <Box
-              w={`${draftPercent}%`}
-              h="100%"
-              bg="gray.300"
-              transition="width 0.3s ease"
-            />
+        <VStack spacing={4} align="stretch">
+          <Box>
+            <Flex justify="space-between" mb={2}>
+              <Text>Active Campaigns</Text>
+              <Text fontWeight="semibold">{stats.active || 0}</Text>
+            </Flex>
+            <Flex justify="space-between" mb={2}>
+              <Text>Completed</Text>
+              <Text fontWeight="semibold">{stats.completed || 0}</Text>
+            </Flex>
+            <Flex justify="space-between" mb={2}>
+              <Text>Draft</Text>
+              <Text fontWeight="semibold">{stats.draft || 0}</Text>
+            </Flex>
           </Box>
-        </Box>
-
-        <SimpleGrid columns={3} spacing={4}>
-          <Box textAlign="center" p={4} bg="gray.50" borderRadius="lg">
-            <Text fontSize="2xl" fontWeight="bold" color="orange.400">
-              {stats.active || 0}
-            </Text>
-            <Text fontSize="sm" color="gray.600">Active</Text>
+          <Divider />
+          <Box>
+            <Flex justify="space-between" mb={2}>
+              <Text>Total Raised</Text>
+              <Text fontWeight="semibold">${stats.totalRaised?.toFixed(2) || '0.00'}</Text>
+            </Flex>
+            <Flex justify="space-between">
+              <Text>Total Goal</Text>
+              <Text fontWeight="semibold">${stats.totalGoal?.toFixed(2) || '0.00'}</Text>
+            </Flex>
           </Box>
-          
-          <Box textAlign="center" p={4} bg="gray.50" borderRadius="lg">
-            <Text fontSize="2xl" fontWeight="bold" color="green.400">
-              {stats.completed || 0}
-            </Text>
-            <Text fontSize="sm" color="gray.600">Completed</Text>
-          </Box>
-          
-          <Box textAlign="center" p={4} bg="gray.50" borderRadius="lg">
-            <Text fontSize="2xl" fontWeight="bold" color="gray.400">
-              {stats.draft || 0}
-            </Text>
-            <Text fontSize="sm" color="gray.600">Draft</Text>
-          </Box>
-        </SimpleGrid>
+        </VStack>
       </CardBody>
     </Card>
   );
@@ -275,24 +218,9 @@ const RecentActivity = ({ activities = [], isLoading }) => {
     return (
       <Card borderRadius="xl" boxShadow="sm">
         <CardBody>
-          <Flex justify="space-between" align="center" mb={4}>
-            <SkeletonText noOfLines={1} width="120px" />
-            <Skeleton height="32px" width="80px" />
-          </Flex>
-          <VStack spacing={4} align="stretch">
-            {[1, 2, 3].map((i) => (
-              <Box key={i}>
-                <Flex justify="space-between" align="center">
-                  <VStack align="start" spacing={1}>
-                    <Skeleton height="20px" width="150px" />
-                    <Skeleton height="16px" width="100px" />
-                  </VStack>
-                  <Skeleton height="16px" width="80px" />
-                </Flex>
-                {i < 3 && <Divider mt={4} />}
-              </Box>
-            ))}
-          </VStack>
+          <Center minH="200px">
+            <Spinner color="orange.500" size="xl" />
+          </Center>
         </CardBody>
       </Card>
     );
@@ -378,15 +306,15 @@ export default function DashboardContent() {
   });
 
   return (
-    <>
-    <NavBar />
-     <Box p={8}>
+    <Box p={8}>
+      {/* Balance Card */}
       <BalanceCard 
         balance={balanceData?.balance?.available || 0}
         pendingBalance={balanceData?.balance?.pending || 0}
         isLoading={balanceLoading}
       />
 
+      {/* Stats Grid */}
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8}>
         <StatCard
           title="Total Donations"
@@ -422,6 +350,7 @@ export default function DashboardContent() {
         />
       </SimpleGrid>
 
+      {/* Campaign Progress and Recent Activity */}
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
         <CampaignProgress 
           stats={statsData?.campaigns || {}}
@@ -433,6 +362,5 @@ export default function DashboardContent() {
         />
       </SimpleGrid>
     </Box>
-    </>
   );
 } 
